@@ -5,103 +5,501 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lab 9</title>
+  <title>Lab 9 - JavaScript Error Handling</title>
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
+  <script>
+    window.TrackJS && TrackJS.install({
+      token: 'bde66f8dedd043028c3213368a98d3cf'
+    });
+  </script>
 
   <style>
-    button {
-      margin: 3px;
+    :root {
+      color-scheme: light;
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.45;
     }
 
-    button:hover {
-      cursor: pointer;
-    }
-
-    #first-num,
-    #second-num {
-      width: 60px;
-    }
-
-    output {
-      border: 1px solid gray;
-      display: block;
-      height: 18px;
-      margin-top: 5px;
-      padding: 5px;
-      width: 240px;
+    body {
+      background: #f7f8fa;
+      color: #17202a;
+      margin: 0;
     }
 
     main {
-      width: 800px;
+      box-sizing: border-box;
+      margin: 0 auto;
+      max-width: 920px;
+      padding: 24px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin: 0 0 18px;
+    }
+
+    fieldset,
+    .panel {
+      background: #ffffff;
+      border: 1px solid #d8dde5;
+      border-radius: 8px;
+      box-sizing: border-box;
+      margin: 0 0 22px;
+      padding: 18px;
+    }
+
+    legend,
+    h2 {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+    }
+
+    .calculator-row {
+      align-items: center;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    label {
+      font-weight: 700;
+    }
+
+    input,
+    select,
+    button {
+      border: 1px solid #aeb7c3;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font: inherit;
+      min-height: 36px;
+    }
+
+    input {
+      padding: 6px 8px;
+      width: 86px;
+    }
+
+    select {
+      background: #ffffff;
+      padding: 6px 8px;
+      width: 56px;
+    }
+
+    button {
+      background: #f0f3f7;
+      color: #17202a;
+      padding: 7px 10px;
+    }
+
+    button:hover {
+      background: #e4e9ef;
+      cursor: pointer;
+    }
+
+    #calculate {
+      background: #0f5967;
+      border-color: #0f5967;
+      color: #ffffff;
+      min-width: 98px;
+    }
+
+    output {
+      background: #f9fbfc;
+      border: 1px solid #cbd3dc;
+      border-radius: 6px;
+      box-sizing: border-box;
+      display: block;
+      margin-top: 12px;
+      min-height: 40px;
+      padding: 9px 10px;
+      width: 100%;
+    }
+
+    output[data-state="error"] {
+      background: #fff4f1;
+      border-color: #d36b55;
+      color: #872814;
+      font-weight: 700;
     }
 
     #error-btns {
-      column-gap: 5px;
-      display: flex;
-      flex-wrap: wrap;
-      margin-top: 30px;
-      row-gap: 5px;
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     }
 
-    #error-btns>* {
-      padding: 8px 2px;
-      width: 122px;
+    #error-btns button {
+      min-height: 44px;
+      width: 100%;
+    }
+
+    #event-log {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    #event-log li {
+      border-top: 1px solid #ecf0f4;
+      display: grid;
+      gap: 4px;
+      grid-template-columns: 94px 1fr;
+      padding: 8px 0;
+    }
+
+    #event-log li:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .event-time {
+      color: #5b6675;
+      font-size: 0.9rem;
+    }
+
+    .event-type {
+      color: #0f5967;
+      font-weight: 700;
+    }
+
+    @media (max-width: 620px) {
+      main {
+        padding: 16px;
+      }
+
+      .calculator-row {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      input,
+      select,
+      #calculate {
+        width: 100%;
+      }
+
+      #event-log li {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 
 <body>
   <main>
+    <h1>Lab 9 Error Handling Demo</h1>
+
     <form>
       <fieldset>
         <legend>Error Calculator</legend>
-        <input name="first-num" id="first-num" />
-        <select name="operator" id="operator">
-          <option>+</option>
-          <option>-</option>
-          <option>*</option>
-          <option>/</option>
-        </select>
-        <input name="second-num" id="second-num" />
-        <button id="calculate">Calculate</button>
-        <br />
-        <output></output>
+        <div class="calculator-row">
+          <label for="first-num">First</label>
+          <input name="first-num" id="first-num" inputmode="decimal" autocomplete="off" />
+          <label for="operator">Operator</label>
+          <select name="operator" id="operator">
+            <option>+</option>
+            <option>-</option>
+            <option>*</option>
+            <option>/</option>
+          </select>
+          <label for="second-num">Second</label>
+          <input name="second-num" id="second-num" inputmode="decimal" autocomplete="off" />
+          <button id="calculate">Calculate</button>
+        </div>
+        <output aria-live="polite">No calculation yet.</output>
       </fieldset>
     </form>
 
-    <section id="error-btns">
-      <button>Console Log</button>
-      <button>Console Error</button>
-      <button>Console Count</button>
-      <button>Console Warn</button>
-      <button>Console Assert</button>
-      <button>Console Clear</button>
-      <button>Console Dir</button>
-      <button>Console dirxml</button>
-      <button>Console Group Start</button>
-      <button>Console Group End</button>
-      <button>Console Table</button>
-      <button>Start Timer</button>
-      <button>End Timer</button>
-      <button>Console Trace</button>
-      <button>Trigger a Global Error</button>
+    <section class="panel" aria-labelledby="console-demos-heading">
+      <h2 id="console-demos-heading">Console Demos</h2>
+      <div id="error-btns">
+        <button type="button">Console Log</button>
+        <button type="button">Console Error</button>
+        <button type="button">Console Count</button>
+        <button type="button">Console Warn</button>
+        <button type="button">Console Assert</button>
+        <button type="button">Console Clear</button>
+        <button type="button">Console Dir</button>
+        <button type="button">Console dirxml</button>
+        <button type="button">Console Group Start</button>
+        <button type="button">Console Group End</button>
+        <button type="button">Console Table</button>
+        <button type="button">Start Timer</button>
+        <button type="button">End Timer</button>
+        <button type="button">Console Trace</button>
+        <button type="button">Trigger a Global Error</button>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="event-log-heading">
+      <h2 id="event-log-heading">Error Journal</h2>
+      <ul id="event-log">
+        <li>
+          <span class="event-time">Ready</span>
+          <span><span class="event-type">system</span> Waiting for a demo action.</span>
+        </li>
+      </ul>
     </section>
   </main>
 
   <script>
-    let form = document.querySelector('form');
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      let output = document.querySelector('output');
-      let firstNum = document.querySelector('#first-num').value;
-      let secondNum = document.querySelector('#second-num').value;
-      let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+    class CalculatorInputError extends Error {
+      constructor(message, details = {}) {
+        super(message);
+        this.name = 'CalculatorInputError';
+        this.details = details;
+      }
+    }
+
+    class DivisionByZeroError extends Error {
+      constructor(details = {}) {
+        super('Division by zero is not allowed in this calculator.');
+        this.name = 'DivisionByZeroError';
+        this.details = details;
+      }
+    }
+
+    const form = document.querySelector('form');
+    const output = document.querySelector('output');
+    const eventLog = document.querySelector('#event-log');
+    const errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
+    const timerName = 'Lab 9 timer demo';
+    let timerRunning = false;
+
+    const sampleUser = {
+      id: 'cse110-lab9',
+      name: 'JavaScript Error Demo',
+      role: 'student project',
+      browser: navigator.userAgent,
+      features: ['console', 'try/catch/finally', 'custom errors', 'window.onerror']
+    };
+
+    const sampleErrors = [
+      { id: 1, type: 'CalculatorInputError', status: 'caught', source: 'form validation' },
+      { id: 2, type: 'DivisionByZeroError', status: 'caught', source: 'custom error class' },
+      { id: 3, type: 'GlobalError', status: 'reported', source: 'window.onerror' }
+    ];
+
+    function addJournalEntry(type, message) {
+      const item = document.createElement('li');
+      const time = document.createElement('span');
+      const detail = document.createElement('span');
+      const label = document.createElement('span');
+
+      time.className = 'event-time';
+      time.textContent = new Date().toLocaleTimeString();
+      label.className = 'event-type';
+      label.textContent = type;
+      detail.append(label, ` ${message}`);
+      item.append(time, detail);
+
+      eventLog.prepend(item);
+
+      while (eventLog.children.length > 6) {
+        eventLog.lastElementChild.remove();
+      }
+    }
+
+    function reportError(error, context) {
+      console.error(`Reported from ${context}:`, error);
+      addJournalEntry(error.name || 'error', error.message || String(error));
+
+      if (window.TrackJS && typeof window.TrackJS.track === 'function') {
+        window.TrackJS.track(error);
+      }
+    }
+
+    window.onerror = function (message, source, line, column, error) {
+      const globalError = error || new Error(message);
+      globalError.source = source;
+      globalError.line = line;
+      globalError.column = column;
+      console.log('window.onerror caught a global error before it stopped the page.');
+      reportError(globalError, 'window.onerror');
+
+      return false;
+    };
+
+    window.addEventListener('unhandledrejection', event => {
+      const reason = event.reason instanceof Error ? event.reason : new Error(String(event.reason));
+      reportError(reason, 'unhandled promise rejection');
     });
 
-    let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        if (window.TrackJS && typeof window.TrackJS.track === 'function') {
+          window.TrackJS.track('Testing TrackJS!');
+          addJournalEntry('trackjs', 'Sent the TrackJS setup test event.');
+        } else {
+          addJournalEntry('trackjs', 'Agent is not loaded. Check blocker/privacy settings.');
+        }
+      }, 1000);
+    });
 
-    // Start your code here
-    // You may move this JS to another file if you wish
+    function parseNumber(rawValue, label) {
+      const value = Number(rawValue);
+
+      if (rawValue.trim() === '' || !Number.isFinite(value)) {
+        throw new CalculatorInputError(`${label} must be a valid number.`, {
+          field: label,
+          submittedValue: rawValue
+        });
+      }
+
+      return value;
+    }
+
+    function calculate(firstNum, operator, secondNum) {
+      const operations = {
+        '+': () => firstNum + secondNum,
+        '-': () => firstNum - secondNum,
+        '*': () => firstNum * secondNum,
+        '/': () => {
+          if (secondNum === 0) {
+            throw new DivisionByZeroError({ firstNum, operator, secondNum });
+          }
+
+          return firstNum / secondNum;
+        }
+      };
+
+      if (!operations[operator]) {
+        throw new CalculatorInputError('The selected operator is not supported.', { operator });
+      }
+
+      return operations[operator]();
+    }
+
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      console.group('Calculator submission');
+
+      try {
+        const firstNum = parseNumber(document.querySelector('#first-num').value, 'First number');
+        const secondNum = parseNumber(document.querySelector('#second-num').value, 'Second number');
+        const operator = document.querySelector('#operator').value;
+        const result = calculate(firstNum, operator, secondNum);
+
+        output.dataset.state = 'success';
+        output.textContent = `${firstNum} ${operator} ${secondNum} = ${result}`;
+        console.log('Successful calculator result:', { firstNum, operator, secondNum, result });
+        addJournalEntry('calculation', output.textContent);
+      } catch (error) {
+        output.dataset.state = 'error';
+        output.textContent = error.message;
+        reportError(error, 'calculator submit');
+      } finally {
+        console.log('Calculator form processing finished at', new Date().toISOString());
+        console.groupEnd();
+      }
+    });
+
+    function showTraceDemo() {
+      function startTrace() {
+        continueTrace();
+      }
+
+      function continueTrace() {
+        finishTrace();
+      }
+
+      function finishTrace() {
+        console.trace('Console Trace demo: stack path from button click');
+      }
+
+      startTrace();
+    }
+
+    const buttonActions = {
+      'Console Log': () => {
+        console.log('Console Log demo:', sampleUser);
+        addJournalEntry('console.log', 'Logged the sample user object.');
+      },
+      'Console Error': () => {
+        const demoError = new Error('Sample console.error message for Lab 9.');
+        console.error('Console Error demo:', demoError);
+        addJournalEntry('console.error', demoError.message);
+      },
+      'Console Count': () => {
+        console.count('Console Count demo button');
+        addJournalEntry('console.count', 'Incremented the named counter.');
+      },
+      'Console Warn': () => {
+        console.warn('Console Warn demo: check suspicious calculator input before using it.');
+        addJournalEntry('console.warn', 'Logged a warning message.');
+      },
+      'Console Assert': () => {
+        const inputLooksValid = false;
+        console.assert(inputLooksValid, 'Console Assert demo failed as expected.', { inputLooksValid });
+        addJournalEntry('console.assert', 'Ran an assertion that intentionally fails.');
+      },
+      'Console Clear': () => {
+        console.clear();
+        addJournalEntry('console.clear', 'Cleared the browser console.');
+      },
+      'Console Dir': () => {
+        console.dir(sampleUser);
+        addJournalEntry('console.dir', 'Printed the sample object properties.');
+      },
+      'Console dirxml': () => {
+        console.dirxml(document.querySelector('#error-btns'));
+        addJournalEntry('console.dirxml', 'Printed the console button section as DOM/XML.');
+      },
+      'Console Group Start': () => {
+        console.group('Console Group demo');
+        console.log('Grouped object:', sampleUser);
+        console.table(sampleErrors);
+        addJournalEntry('console.group', 'Started a console group with logs inside.');
+      },
+      'Console Group End': () => {
+        console.log('Closing the current console group.');
+        console.groupEnd();
+        addJournalEntry('console.groupEnd', 'Closed the current console group.');
+      },
+      'Console Table': () => {
+        console.table(sampleErrors);
+        addJournalEntry('console.table', 'Printed sample errors in a table.');
+      },
+      'Start Timer': () => {
+        console.time(timerName);
+        timerRunning = true;
+        addJournalEntry('console.time', 'Started the timer.');
+      },
+      'End Timer': () => {
+        if (!timerRunning) {
+          console.warn('Timer was ended before it started.');
+          addJournalEntry('console.timeEnd', 'Timer was not running.');
+          return;
+        }
+
+        console.timeEnd(timerName);
+        timerRunning = false;
+        addJournalEntry('console.timeEnd', 'Stopped the timer.');
+      },
+      'Console Trace': () => {
+        showTraceDemo();
+        addJournalEntry('console.trace', 'Printed a nested call stack trace.');
+      },
+      'Trigger a Global Error': () => {
+        addJournalEntry('global error', 'Calling an undefined function for window.onerror.');
+        thisFunctionDoesNotExist();
+      }
+    };
+
+    errorBtns.forEach(button => {
+      button.addEventListener('click', () => {
+        const action = buttonActions[button.textContent.trim()];
+
+        if (action) {
+          action();
+        }
+      });
+    });
   </script>
 </body>
 
